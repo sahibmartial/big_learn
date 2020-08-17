@@ -14,7 +14,7 @@ var ss : SparkSession = null
         .getOrCreate()
 
     }else{
-      ss  = SparkSession.builder()
+      ss :sparkbigdata = SparkSession.builder()
         .appName("application Name")
         .master("local[*]")
         .config("spark.serialiszer", "org.apache.serializer.kryoserializer")
