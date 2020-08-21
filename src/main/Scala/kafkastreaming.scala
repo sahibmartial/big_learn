@@ -1,4 +1,4 @@
-import kafkastreaming.{kafkaparam, ssc}
+
 import org.apache.spark.streaming.kafka010
 import org.apache.kafka.clients.consumer._
 import org.apache.kafka.common.serialization._

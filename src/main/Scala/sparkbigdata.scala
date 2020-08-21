@@ -4,6 +4,7 @@ import org.apache.spark.streaming._
 
 object sparkbigdata {
 var ss : SparkSession = null
+  var spConf   : SparkSession = null
 
   /**
    *
