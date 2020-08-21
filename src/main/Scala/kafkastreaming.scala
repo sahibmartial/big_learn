@@ -3,7 +3,7 @@ import org.apache.kafka.common.protocol.SecurityProtocol
 import org.apache.kafka.common.serialization.StringDeserializer
 
 object kafkastreaming {
- var  kafkaparam : Map[String,Object]=Map(null,null)
+ var cd doc  kafkaparam : Map[String,Object]=Map(null,null)
 
   def getKafkaSparkConsumerParams ( kafkaBootStrapServers : String, KafkaConsumerGroupId : String, KafkaConsumerReadOrder : String,
                                     KafkaZookeeper : String, KerberosName : String) : Map[String, Object] = {
