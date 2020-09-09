@@ -1,0 +1,3 @@
+class Consommation_Streaming {
+
+}
