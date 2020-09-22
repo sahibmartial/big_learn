@@ -8,10 +8,13 @@ object helloworld {
   val name: String="sahibmartial"
   //BasicConfigurator.configure()
   private var  trace_appli : Logger=LogManager.getLogger("Logger_Console")
-  def main(args: Array[String]): Unit = {
-    println("hello world mon 1er programme")
 
+  def main(args: Array[String]): Unit = {
+
+    hello()
     println("votre texte contient :"+compte_caracte("bonjour")+" characters")
+    println()
+    divisionentier(20,5)
   }
   //fisrt fonction
   def compte_caracte(carac: String) : Int={
@@ -24,8 +27,27 @@ object helloworld {
       carac.trim.length
     }
   }
-  println("hello Ami Sahibmartial")
 
- // getSparkStreamingContext(true,10)
+def hello()= {
+  println("hello world mon 1er programme")
+  println("Hello Ami Sahibmartial")
+}
+
+  def divisionentier(num:Int,deno:Int):Double= {
+    if(deno!=null){
+      val result=num/deno
+      println(s"division possible et le resultat est : $result")
+     return result
+    }else{
+     val result=0.0
+      println(s"division par zero impossible: $deno")
+      return result
+    }
+  }
+
+
+
+
+  // getSparkStreamingContext(true,10)
   //getConskafka("localhost:9092","groupe_dsi","latest","","",10,Array("TutorialTopic"))
 }

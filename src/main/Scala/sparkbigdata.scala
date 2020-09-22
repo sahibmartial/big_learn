@@ -18,7 +18,7 @@ var ss : SparkSession = null
       ss = SparkSession.builder()
         .master("local[*]")
         .config("spark.sql.crossJoin.enabled", "true")
-        .enableHiveSupport()
+     //   .enableHiveSupport() //doit etree installer sinon error laors du lancement
         .getOrCreate()
 
     }else{

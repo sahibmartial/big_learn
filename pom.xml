@@ -19,6 +19,8 @@
         <cassandra.version>0.8.1</cassandra.version>
         <twitter4j.version>4.0.4</twitter4j.version>
         <spark.twitter.streaming>1.6.2</spark.twitter.streaming>
+        <junit-version>4.12</junit-version>
+        <sclatest-version>3.1.1</sclatest-version>
     </properties>
 
     <dependencies>
@@ -106,10 +108,28 @@
             <version>${spark.twitter.streaming}</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/junit/junit -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit-version}</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.scalatest/scalatest -->
+        <dependency>
+            <groupId>org.scalatest</groupId>
+            <artifactId>scalatest_2.11</artifactId>
+            <version>${sclatest-version}</version>
+            <scope>test</scope>
+        </dependency>
 
-
-
-
+        <!-- https://mvnrepository.com/artifact/com.holdenkarau/spark-testing-base -->
+        <dependency>
+            <groupId>com.holdenkarau</groupId>
+            <artifactId>spark-testing-base_2.11</artifactId>
+            <version>2.2.0_0.7.4</version>
+            <scope>test</scope>
+        </dependency>
 
 
     </dependencies>

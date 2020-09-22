@@ -11,12 +11,18 @@ import com.twitter.hbc.core.processor.StringDelimitedProcessor
 import kafkastreaming._
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
 import org.apache.log4j.{LogManager, Logger}
+import org.apache.spark.sql
 import org.apache.spark.streaming.Minutes
 import twitter4j._
 import twitter4j.auth.OAuthAuthorization
 import twitter4j.conf.{Configuration, ConfigurationBuilder}
 import org.apache.spark.streaming.twitter.TwitterUtils
 import sparkbigdata._
+import java.sql.{Connection, DriverManager, ResultSet, SQLException}
+
+import consommation_streaming.batchDuration
+import org.apache.spark.streaming.kafka010.KafkaUtils
+
 /**
  * Cette classe permet de creer un flux streaming a partir de twitter  que nous allons coupler a notre producer de kafka pour du streaming
  */
@@ -76,7 +82,7 @@ class TwitterkafkaStreaming {
           while (client_hbc.isDone) {
             val tweets: String = queue.poll(15, TimeUnit.SECONDS)
             try{
-              trace_twitter.info("Appel du client publish-suscribe du system kafka :")
+              trace_twitter.info("Appel du client publish-suscribe du system kafka pour persister ds les logs, apres  :")
               getproducerkafka(kafkabootsrapservers, topic, tweets)
               println("message " + tweets)
             }catch {
@@ -182,7 +188,7 @@ class TwitterkafkaStreaming {
     //creation authentification
     val authen= new OAuthAuthorization(twitterauthenconf(CONSUMER_KEY,CONSUMER_SECRET,ACCESS_TOKEN,TOKEN_SECRET).build())
 
-    //creation du client steaming
+    //creation du client streaming
     val twittersparkstream = TwitterUtils.createStream(getSparkStreamingContext(true,15),Some(authen),filtre) //Some pour dire que aunthen est optionnel
      //creation des filtres ensmble de RDD a manipuler avt de les persister don ce sont ces variables que je persiste ds les logs kafka
 
@@ -198,7 +204,7 @@ class TwitterkafkaStreaming {
      //recuperation ds counts  fr after 5 mn
     val hastagfrcount=hastagfr.window(Minutes(5))
     //recuper les tweets taguer big_data A revoir
-    val tweetfr_bigdata=tweetFr.flatMap(status => status.getText().filter(status=>status.equals()==" #big_data"))
+    val tweetfr_bigdata=tweetFr.flatMap(status =>status.getText().split(" ").filter(status=>status.startsWith("#big_data")))// separe par des espaces puis rechercher ceux qui commence par bigdata
 
     //persister ds un fichiier
     tweetmsg.saveAsTextFiles("tweet","json")
@@ -229,7 +235,7 @@ class TwitterkafkaStreaming {
           if(!tweetrdd.isEmpty()){
             tweetrdd.foreachPartition{
               tweetpartition =>
-                val producer_kafka= new KafkaProducer[String,String](getkafkaproducerparam(kafkabootsrapservers))
+                val producer_kafka= new KafkaProducer[String,String](getkafkasparkproducerparam(kafkabootsrapservers))
                 tweetpartition.foreach{
                   tweet=>
                     val record_publish= new ProducerRecord[String,String](topic,tweet.toString())
@@ -257,7 +263,60 @@ class TwitterkafkaStreaming {
   }
 
 
+  /**
+   *
+   * se  connecter la bd , execute une requete sql et passser le resultat a mon producer qui ecoute en permanence
+   */
 
+  def producer_stream_db(kafkabootsrapservers:String,topic:String,batchDuration:Int)={
+    val ssc=getSparkStreamingContext(true,batchDuration)
+    val infos  = connectbd()
+
+      if(!infos.isEmpty){
+        getproducerkafka(kafkabootsrapservers,topic,infos)
+        getproducerkafka(kafkabootsrapservers,"","").close()
+      }else{
+        println("info vide")
+      }
+
+    ssc.start()
+    ssc.awaitTermination()
+  }
+
+  /**
+   * fonction JDBC pour se connecter a une bd via ApI  de java pour recuperer les infos de la bd
+   */
+  def connectbd() :String ={
+    // connect to the database named "mysql" on the localhost
+    val driver = "com.mysql.jdbc.Driver"
+    val url = "jdbc:mysql://localhost/mysql"
+    val username = "root"
+    val password = "root"
+    var connection:Connection = null
+    val resultSet :String =""
+    try {
+      Class.forName(driver)
+      connection = DriverManager.getConnection(url, username, password)
+
+      /*val   connect =
+        DriverManager.getConnection("jdbc:mysql://localhost/test?" +
+          "user=minty&password=greatsqldb")*/
+
+      // create the statement, and run the select query
+      val statement = connection.createStatement()
+      val resultSet = statement.executeQuery("SELECT host, user FROM user")//retourne un json
+      while (resultSet.next()) {
+        val host = resultSet.getString("host")
+        val user = resultSet.getString("user")
+        println("host, user = " + host + ", " + user)
+      }
+    }catch {
+      case ex:Exception=>ex.printStackTrace()
+    }finally {
+      connection.close()
+    }
+    return resultSet
+  }
 
 
 }

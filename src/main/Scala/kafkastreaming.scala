@@ -18,8 +18,10 @@ import sparkbigdata._
 import org.apache.log4j._
 import java.util.Properties
 import java.util.Collections
+
 import scala.collection.JavaConverters._
 import org.apache.kafka.common.internals.Topic
+import org.apache.spark.streaming.StreamingContext
 
 object kafkastreaming {
 
@@ -64,19 +66,18 @@ object kafkastreaming {
    * @param KafkaConsumerReadOrder:ordre de lecture des logs
    * @param KafkaZookeeper:  @ip et port de zookeeper
    * @param KerberosName: nom du service kerbreos
-   * @param batchDuration: duree du batch
    * @param KafkaTopics:nom du topic
    * @return reourne une table clé valeur du topic
    */
 
   def getConsumerSparkkafka(kafkaBootStrapServers : String, KafkaConsumerGroupId : String, KafkaConsumerReadOrder : String,
-                   KafkaZookeeper : String, KerberosName : String,batchDuration :Int,KafkaTopics : Array[String]) : InputDStream[ConsumerRecord[String,String]] = {
+                            KafkaZookeeper : String, KerberosName : String, KafkaTopics : Array[String],streamContext:StreamingContext) : InputDStream[ConsumerRecord[String,String]] = {
     trace_conso.info("initialisation  ConsoKfaka Streaming")
-    val ssc = getSparkStreamingContext(true,batchDuration)
+   // val ssc = getSparkStreamingContext(true,batchDuration)//instancie le contextspark au niveau du consumerkafka
     kafkaparam = getKafkaSparkConsumerParams(kafkaBootStrapServers,KafkaConsumerGroupId,
       KafkaConsumerReadOrder ,KafkaZookeeper,KerberosName)
     val consokafka : InputDStream[ConsumerRecord[String,String]] = KafkaUtils.createDirectStream[String,String](
-      ssc,
+      streamContext,
       PreferConsistent,
       Subscribe[String, String](KafkaTopics,kafkaparam)//recupere trois infos de kafaka topic , partition et offset
 
@@ -86,14 +87,12 @@ object kafkastreaming {
     return consokafka
   }
 
-  //Creation un consumer et producer via API KAFKA
-
   /**
    *
    * @param kafkabootsrapservers
    * @return
    */
- def getkafkaproducerparam(kafkabootsrapservers :String ): Properties = {
+ def getkafkasparkproducerparam(kafkabootsrapservers :String ): Properties = {
    val props : Properties = new Properties()
    props.put("key.serializer","org.apache.kafka.common.serialization.StringSerializer")
    props.put("value.serializer","org.apache.kafka.common.serialization.StringSerializer")
@@ -104,7 +103,7 @@ object kafkastreaming {
  }
 
   /**
-   *
+   *création d'un Kafka Producer qui va être déployé en production
    * @param kafkabootsrapservers
    * @param topic_name
    * @param message
@@ -112,7 +111,7 @@ object kafkastreaming {
    */
   def getproducerkafka(kafkabootsrapservers :String, topic_name:String,message: String) : KafkaProducer[String,String]={
     trace_conso.info(s"initialisation et connexion  au producer kafka  ${kafkabootsrapservers}")
-  lazy  val producer_kafka= new KafkaProducer[String,String](getkafkaproducerparam(kafkabootsrapservers))
+  lazy  val producer_kafka= new KafkaProducer[String,String](getkafkasparkproducerparam(kafkabootsrapservers))
     try{
       trace_conso.info(s"message a pulbier dans le topic  par le producer kafka ${topic_name}, ${message}")
       val record_publish= new ProducerRecord[String,String](topic_name,message)
@@ -121,12 +120,16 @@ object kafkastreaming {
     }catch {
       case ex: Exception =>
         trace_conso.error(s"erreur dans la publication de kafka ${ex.printStackTrace()}")
-        trace_conso.error(s"la liste des param de connexion au producer sont${getkafkaproducerparam(kafkabootsrapservers)}")
+        trace_conso.error(s"la liste des param de connexion au producer sont${getkafkasparkproducerparam(kafkabootsrapservers)}")
     }finally {
       //producer_kafka.close() //via on consomme massive distribue le fermer ds la source streaming
     }
       return producer_kafka
   }
+
+
+  //Creation un consumer via API KAFKA et le producer ac kafka ou ac spark est le meme
+  //setp producer et consumer kafka ce qui est execute en mode console
 
   /**
    *
@@ -140,7 +143,7 @@ object kafkastreaming {
     props.put("value.serializer","org.apache.kafka.common.serialization.StringDeserializer")
     props.put("groupe.id",KafkaConsumerGroupId)
     props.put("bootstrap.servers",kafkabootsrapservers)
-    props.put("enable.auto.commit" ,"false")
+    props.put("enable.auto.commit" ,"false")//en metteant a false on gere l'offset a true offset non gerer treatment brut
     props.put("auto.offset.reset", "latest")
     props.put("security.protocol","SASL_PLAINTEXT")
     return props
