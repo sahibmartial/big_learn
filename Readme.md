@@ -22,12 +22,15 @@ pour installer l'application soit vous faites:
 git pull lien du repo
 ```
 ou encore vou faites :
+
 #Auteur
 **Sahibmartial** [sahibmartial](https://github.com/sahibmartial/big_learn)
+
 #Contributeurs
 
 #version
 La version du projet est 1.0
+
 #Licence
 Projet soumis aux droits d'auteurs et protégé par copyrigth.
 Vous pouvez utiliser en mode dev mais par en production
