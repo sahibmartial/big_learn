@@ -1,8 +1,9 @@
-#Projet Apprentissage creation d'application de consommation Big Data Streaming 
+#Projet Apprentissage creation d'applicationd e consommation Big Data Streaming 
 
 ##Descripton du projet 
 Cette foreamtion est une illustration de conception d'une application de consommation d'application big data streeaming.
-Cas pratique des cours  Apache Spark with scala et big data straeming de  Editions Juvenal et associes 
+Cas pratique des cours  Apache Spark with scala et big data straeming de  Editions Juvenal et associes.
+ 
 #Prerequis
 Pour que ce projet chez vs vous avez besoin de dependances suivantes:
 * [spark-core 2.2.0](https://mvnrepository.com/artifact/org.apache.spark/spark-core)
