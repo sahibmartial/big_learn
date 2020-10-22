@@ -11,7 +11,7 @@
         <spak-core-version>2.2.0</spak-core-version>
         <spak-sql-version>2.2.0</spak-sql-version>
         <spak-streaming-version>2.2.0</spak-streaming-version>
-        <scala-version>2.11.8</scala-version>
+        <scala-version>2.11.0</scala-version>
         <spark-streaming-kafka>2.2.0</spark-streaming-kafka>
        <log4j.version>2.13.3</log4j.version>
         <kafka-client-version>2.1.0</kafka-client-version>

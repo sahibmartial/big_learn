@@ -56,8 +56,8 @@ object IndicateurStreaming {
            * create sesssion spark pour use les data frame ac ls sparkcontest
            * et realisermes aoperations sur les values transformer en dataframe
            */
-          val ssession = SparkSession.builder.config(rdd_kafka.sparkContext.getConf).enableHiveSupport().getOrCreate()
-          import ssession.implicits._
+          val session = SparkSession.builder.config(rdd_kafka.sparkContext.getConf).enableHiveSupport().getOrCreate()
+          import session.implicits._
 
           val events_df = event_kafka.toDF("kafka_jsons")//creation new rdd dataframe
 
@@ -74,8 +74,8 @@ object IndicateurStreaming {
 
           } else {
 
-            val df_parsed = getParsedData(events_df, ssession)
-            val df_kpi = getIndicateursComputed(df_parsed, ssession).cache()
+            val df_parsed = getParsedData(events_df, session)
+            val df_kpi = getIndicateursComputed(df_parsed, session).cache()
 
             df_kpi.repartition(1)
               .write
